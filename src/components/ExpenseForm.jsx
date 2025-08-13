@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { categories } from "../constants/categories";
 
 export default function ExpenseForm({ onAddExpense }) {
+  const today = new Date().toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     category: categories[0],
     amount: "",
-    date: new Date().toISOString().split("T")[0],
+    date: today,
     description: "",
   });
 
@@ -25,6 +27,8 @@ export default function ExpenseForm({ onAddExpense }) {
 
     if (!formData.date) {
       newErrors.date = "Please select a date";
+    } else if (new Date(formData.date) > new Date()) {
+      newErrors.date = "Date cannot be in the future";
     }
 
     setErrors(newErrors);
@@ -45,14 +49,13 @@ export default function ExpenseForm({ onAddExpense }) {
     if (validate()) {
       onAddExpense({
         ...formData,
-        amount: parseFloat(formData.amount), // ensure number
+        amount: parseFloat(formData.amount),
       });
 
-      // Reset form
       setFormData({
         category: categories[0],
         amount: "",
-        date: new Date().toISOString().split("T")[0],
+        date: today,
         description: "",
       });
 
@@ -87,8 +90,8 @@ export default function ExpenseForm({ onAddExpense }) {
             type="number"
             name="amount"
             value={formData.amount}
-            min="0.01"
-            step="0.01"
+            min="0.1"
+            step="0.1"
             onChange={handleChange}
             className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
               errors.amount ? "border-red-500" : "focus:ring-blue-500"
@@ -104,6 +107,7 @@ export default function ExpenseForm({ onAddExpense }) {
             type="date"
             name="date"
             value={formData.date}
+            max={today}
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
